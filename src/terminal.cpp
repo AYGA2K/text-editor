@@ -6,19 +6,19 @@
 #include <unistd.h>
 
 void disableRawMode() {
-  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &editorConfig.orig_termios) == -1)
+  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &editorState.orig_termios) == -1)
     die("tcsetattr");
 }
 
 void enableRawMode() {
 
-  if (tcgetattr(STDIN_FILENO, &editorConfig.orig_termios) == -1) {
+  if (tcgetattr(STDIN_FILENO, &editorState.orig_termios) == -1) {
     die("tcgetattr");
   }
 
   atexit(disableRawMode);
 
-  struct termios raw = editorConfig.orig_termios;
+  struct termios raw = editorState.orig_termios;
   /* Disable special handling of input bytes */
   raw.c_iflag &=
       ~(BRKINT | /* do not generate SIGINT on break condition */

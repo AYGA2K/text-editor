@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 std::string buffer;
-struct EditorConfig editorConfig;
+struct EditorState editorState;
 
 int getWindowSize(int *rows, int *cols) {
   struct winsize ws;
@@ -26,18 +26,18 @@ void editorOpen(const std::string &filename) {
   }
   std::string line;
   while (std::getline(file, line)) {
-    editorConfig.rows.push_back(line);
-    editorConfig.numrows += 1;
+    editorState.rows.push_back(line);
+    editorState.numrows += 1;
   }
 }
 
 void initEditor() {
-  editorConfig.cursorx = 0;
-  editorConfig.cursory = 0;
-  editorConfig.numrows = 0;
-  editorConfig.row_offest = 0;
-  editorConfig.col_offset = 0;
-  if (getWindowSize(&editorConfig.screenrows, &editorConfig.screencols) == -1) {
+  editorState.cursorx = 0;
+  editorState.cursory = 0;
+  editorState.numrows = 0;
+  editorState.row_offest = 0;
+  editorState.col_offset = 0;
+  if (getWindowSize(&editorState.screenrows, &editorState.screencols) == -1) {
     die("getWindowSize");
   }
 }

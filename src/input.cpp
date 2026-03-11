@@ -70,7 +70,7 @@ int readKey() {
   return c;
 }
 
-void processKeyPress() {
+void handleInsertMode() {
   int c = readKey();
   switch (c) {
   case CTRL_KEY('q'):
@@ -78,14 +78,14 @@ void processKeyPress() {
     exit(0);
     break;
   case HOME_KEY:
-    editorConfig.cursorx = 0;
+    editorState.cursorx = 0;
     break;
   case END_KEY:
-    editorConfig.cursorx = editorConfig.screencols - 1;
+    editorState.cursorx = editorState.screencols - 1;
     break;
   case PAGE_DOWN:
   case PAGE_UP: {
-    int times = editorConfig.screenrows;
+    int times = editorState.screenrows;
     while (times > 0) {
       moveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
       times--;
@@ -98,13 +98,13 @@ void processKeyPress() {
     moveCursor(c);
     break;
   case DEL_KEY: {
-    deleteCharAt(editorConfig.cursory, editorConfig.cursorx);
+    deleteCharAt(editorState.cursory, editorState.cursorx);
   } break;
 
   case 127: {
-    deleteCharAt(editorConfig.cursory, editorConfig.cursorx - 1);
-    if (editorConfig.cursorx > 0) {
-      editorConfig.cursorx--;
+    deleteCharAt(editorState.cursory, editorState.cursorx - 1);
+    if (editorState.cursorx > 0) {
+      editorState.cursorx--;
     }
   } break;
 
@@ -112,6 +112,47 @@ void processKeyPress() {
     if (c >= 32 && c < 127) {
       editorInsertChar(c);
     }
+    break;
+  }
+}
+void handleNormalMode() {
+  int c = readKey();
+  switch (c) {
+  case 105:
+    editorState.mode = INSERT;
+    break;
+  case ARROW_LEFT:
+  case ARROW_RIGHT:
+  case ARROW_DOWN:
+  case ARROW_UP:
+    moveCursor(c);
+    break;
+  case 104:
+    moveCursor(ARROW_LEFT);
+    break;
+  case 106:
+    moveCursor(ARROW_DOWN);
+    break;
+  case 107:
+    moveCursor(ARROW_UP);
+    break;
+  case 108:
+    moveCursor(ARROW_RIGHT);
+    break;
+  }
+}
+
+void processKeyPress() {
+  switch (editorState.mode) {
+  case NORMAL:
+    handleNormalMode();
+    break;
+  case INSERT:
+    handleInsertMode();
+    break;
+  case VISUAL:
+    break;
+  case COMMAND:
     break;
   }
 }

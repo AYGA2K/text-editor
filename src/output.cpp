@@ -11,8 +11,8 @@ void refreshScreen() {
   drawRaws();
 
   std::ostringstream oss;
-  oss << "\x1b[" << editorConfig.cursory - editorConfig.row_offest + 1 << ";"
-      << editorConfig.cursorx - editorConfig.col_offset + 1
+  oss << "\x1b[" << editorState.cursory - editorState.row_offest + 1 << ";"
+      << editorState.cursorx - editorState.col_offset + 1
       << "H"; // reposition the cursor
   buffer += oss.str();
 
@@ -22,17 +22,17 @@ void refreshScreen() {
 }
 
 void drawRaws() {
-  for (int y = 0; y < editorConfig.screenrows; y++) {
-    int filerow = y + editorConfig.row_offest;
-    if (filerow >= editorConfig.numrows) {
+  for (int y = 0; y < editorState.screenrows; y++) {
+    int filerow = y + editorState.row_offest;
+    if (filerow >= editorState.numrows) {
       // Draw welcome message in the middle
-      if (editorConfig.numrows == 0 && y == editorConfig.screenrows / 3) {
+      if (editorState.numrows == 0 && y == editorState.screenrows / 3) {
         std::string welcome = "The editor";
         int welcomelen = static_cast<int>(welcome.size());
-        if (welcomelen > editorConfig.screencols)
-          welcomelen = editorConfig.screencols;
+        if (welcomelen > editorState.screencols)
+          welcomelen = editorState.screencols;
 
-        int padding = (editorConfig.screencols - welcomelen) / 2;
+        int padding = (editorState.screencols - welcomelen) / 2;
         if (padding > 0) {
           buffer += "~";
           padding--;
@@ -43,46 +43,46 @@ void drawRaws() {
         buffer += "~";
       }
     } else {
-      const std::string &line = editorConfig.rows[filerow];
+      const std::string &line = editorState.rows[filerow];
       int linelen = line.size();
       int len;
 
-      if (editorConfig.col_offset >= linelen) {
+      if (editorState.col_offset >= linelen) {
         len = 0;
       } else {
-        len = linelen - editorConfig.col_offset;
-        if (len > editorConfig.screencols) {
-          len = editorConfig.screencols;
+        len = linelen - editorState.col_offset;
+        if (len > editorState.screencols) {
+          len = editorState.screencols;
         }
       }
 
-      buffer += line.substr(editorConfig.col_offset, len);
+      buffer += line.substr(editorState.col_offset, len);
     }
 
     buffer += "\x1b[K"; // clear the rest of the line
 
-    if (y < editorConfig.screenrows - 1) {
+    if (y < editorState.screenrows - 1) {
       buffer += "\r\n"; // newline
     }
   }
 }
 
 void editorScroll() {
-  if (editorConfig.cursory < editorConfig.row_offest) {
-    editorConfig.row_offest = editorConfig.cursory;
+  if (editorState.cursory < editorState.row_offest) {
+    editorState.row_offest = editorState.cursory;
   }
 
-  if (editorConfig.cursory >=
-      editorConfig.row_offest + editorConfig.screenrows) {
-    editorConfig.row_offest =
-        editorConfig.cursory - editorConfig.screenrows + 1;
+  if (editorState.cursory >=
+      editorState.row_offest + editorState.screenrows) {
+    editorState.row_offest =
+        editorState.cursory - editorState.screenrows + 1;
   }
-  if (editorConfig.cursorx < editorConfig.col_offset) {
-    editorConfig.col_offset = editorConfig.cursorx;
+  if (editorState.cursorx < editorState.col_offset) {
+    editorState.col_offset = editorState.cursorx;
   }
-  if (editorConfig.cursorx >=
-      editorConfig.col_offset + editorConfig.screencols) {
-    editorConfig.col_offset =
-        editorConfig.cursorx - editorConfig.screencols + 1;
+  if (editorState.cursorx >=
+      editorState.col_offset + editorState.screencols) {
+    editorState.col_offset =
+        editorState.cursorx - editorState.screencols + 1;
   }
 }

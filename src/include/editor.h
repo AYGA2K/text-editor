@@ -5,7 +5,9 @@
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
-enum editorKey {
+enum Mode { NORMAL, INSERT, VISUAL, COMMAND };
+
+enum EditorKey {
   ARROW_LEFT = 1000,
   ARROW_RIGHT,
   ARROW_UP,
@@ -17,7 +19,8 @@ enum editorKey {
   DEL_KEY,
 };
 
-struct EditorConfig {
+struct EditorState {
+  Mode mode = NORMAL;
   int cursorx;
   int cursory;
   int screenrows;
@@ -29,7 +32,7 @@ struct EditorConfig {
   std::vector<std::string> rows;
 };
 
-extern struct EditorConfig editorConfig;
+extern struct EditorState editorState;
 extern std::string buffer;
 
 int getWindowSize(int *rows, int *cols);

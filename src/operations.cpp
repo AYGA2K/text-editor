@@ -2,54 +2,54 @@
 #include "include/editor.h"
 
 void editorInsertChar(int c) {
-  int row = editorConfig.cursory;
-  int col = editorConfig.cursorx;
+  int row = editorState.cursory;
+  int col = editorState.cursorx;
 
   // Create missing rows if needed
-  if (row >= editorConfig.numrows) {
-    while (editorConfig.numrows <= row) {
-      editorConfig.rows.push_back("");
-      editorConfig.numrows++;
+  if (row >= editorState.numrows) {
+    while (editorState.numrows <= row) {
+      editorState.rows.push_back("");
+      editorState.numrows++;
     }
   }
 
   // Fill row with spaces if cursor is past the end
-  if (col >= static_cast<int>(editorConfig.rows[row].size())) {
-    editorConfig.rows[row].resize(col, ' ');
+  if (col >= static_cast<int>(editorState.rows[row].size())) {
+    editorState.rows[row].resize(col, ' ');
   }
 
-  editorConfig.rows[row].insert(col, 1, static_cast<char>(c));
-  editorConfig.cursorx++;
+  editorState.rows[row].insert(col, 1, static_cast<char>(c));
+  editorState.cursorx++;
 }
 
 void deleteCharAt(int row, int col) {
-  if (editorConfig.rows[row][col]) {
-    editorConfig.rows[row].erase(col, 1);
+  if (editorState.rows[row][col]) {
+    editorState.rows[row].erase(col, 1);
   }
 }
 
 void moveCursor(int key) {
   switch (key) {
   case ARROW_LEFT:
-    if (editorConfig.cursorx != 0) {
-      editorConfig.cursorx--;
+    if (editorState.cursorx != 0) {
+      editorState.cursorx--;
     }
     break;
   case ARROW_RIGHT:
-    if (editorConfig.cursory < editorConfig.numrows &&
-        editorConfig.cursorx <
-            (int)editorConfig.rows[editorConfig.cursory].size()) {
-      editorConfig.cursorx++;
+    if (editorState.cursory < editorState.numrows &&
+        editorState.cursorx <
+            (int)editorState.rows[editorState.cursory].size()) {
+      editorState.cursorx++;
     }
     break;
   case ARROW_UP:
-    if (editorConfig.cursory != 0) {
-      editorConfig.cursory--;
+    if (editorState.cursory != 0) {
+      editorState.cursory--;
     }
     break;
   case ARROW_DOWN:
-    if (editorConfig.cursory < editorConfig.numrows) {
-      editorConfig.cursory++;
+    if (editorState.cursory < editorState.numrows) {
+      editorState.cursory++;
     }
     break;
   }

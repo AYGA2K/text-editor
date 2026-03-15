@@ -2,11 +2,13 @@
 #include "include/utils.h"
 #include <fstream>
 #include <string>
+#include <string_view>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
 std::string buffer;
 struct EditorState editorState;
+int tabWidth = 2;
 
 int getWindowSize(int *rows, int *cols) {
   struct winsize ws;
@@ -19,6 +21,19 @@ int getWindowSize(int *rows, int *cols) {
   }
 }
 
+std::string expandTabs(std::string_view s) {
+  std::string result;
+  for (char c : s) {
+    if (c == '\t')
+      result.append(tabWidth, ' ');
+    else
+      result += c;
+  }
+  return result;
+}
+
+void editorUpdateRow(EditorRow &row) { row.render = expandTabs(row.chars); }
+
 void editorOpen(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
@@ -26,7 +41,10 @@ void editorOpen(const std::string &filename) {
   }
   std::string line;
   while (std::getline(file, line)) {
-    editorState.rows.push_back(line);
+    EditorRow row;
+    row.chars = line;     // keep tabs as '\t' in chars
+    editorUpdateRow(row); // prepare render with tabs expanded
+    editorState.rows.push_back(row);
     editorState.numrows += 1;
   }
 }

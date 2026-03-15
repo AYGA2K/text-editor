@@ -19,22 +19,29 @@ enum EditorKey {
   DEL_KEY,
 };
 
+struct EditorRow {
+  std::string chars;   // raw characters (may contain '\t')
+  std::string render;  // rendered characters (tabs expanded to spaces)
+};
+
 struct EditorState {
-  Mode mode = NORMAL;
-  int cursorx;
-  int cursory;
-  int screenrows;
-  int screencols;
-  int numrows;
-  int row_offest;
-  int col_offset;
-  struct termios orig_termios;
-  std::vector<std::string> rows;
+  struct termios orig_termios;   // original terminal settings
+  Mode mode = NORMAL;            // current editor mode
+  std::vector<EditorRow> rows;   // lines of the file
+  int numrows;                   // total number of rows in the file
+  int cursorx;                   // cursor column position in the current row
+  int cursory;                   // cursor row position in the file
+  int screenrows;                // number of rows the terminal can display
+  int screencols;                // number of columns the terminal can display
+  int row_offest;                // vertical scroll offset
+  int col_offset;                // horizontal scroll offset
 };
 
 extern struct EditorState editorState;
 extern std::string buffer;
+extern int tabWidth;
 
 int getWindowSize(int *rows, int *cols);
 void initEditor();
 void editorOpen(const std::string &filename);
+void editorUpdateRow(EditorRow &row);

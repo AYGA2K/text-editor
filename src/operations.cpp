@@ -1,5 +1,6 @@
 #include "include/operations.h"
 #include "include/editor.h"
+#include <cstddef>
 
 void editorInsertChar(int c) {
   int row = editorState.cursory;
@@ -8,27 +9,36 @@ void editorInsertChar(int c) {
   // Create missing rows if needed
   if (row >= editorState.numrows) {
     while (editorState.numrows <= row) {
-      editorState.rows.push_back("");
+      EditorRow newRow;
+      editorState.rows.push_back(newRow);
       editorState.numrows++;
     }
   }
 
   // Fill row with spaces if cursor is past the end
-  if (col >= static_cast<int>(editorState.rows[row].size())) {
-    editorState.rows[row].resize(col, ' ');
+  if (col >= static_cast<int>(editorState.rows[row].chars.size())) {
+    editorState.rows[row].chars.resize(col, ' ');
   }
 
-  editorState.rows[row].insert(col, 1, static_cast<char>(c));
+  editorState.rows[row].chars.insert(col, 1, static_cast<char>(c));
+  editorUpdateRow(editorState.rows[row]);
   editorState.cursorx++;
 }
 
 void deleteCharAt(int row, int col) {
-  if (editorState.rows[row][col]) {
-    editorState.rows[row].erase(col, 1);
-  }
+  if (row < 0 || row >= editorState.numrows)
+    return;
+  if (col < 0 || col >= static_cast<int>(editorState.rows[row].chars.size()))
+    return;
+
+  editorState.rows[row].chars.erase(col, 1);
+  editorUpdateRow(editorState.rows[row]);
 }
 
 void moveCursor(int key) {
+  EditorRow *row = (editorState.cursory >= editorState.numrows)
+                       ? NULL
+                       : &editorState.rows[editorState.cursory];
   switch (key) {
   case ARROW_LEFT:
     if (editorState.cursorx != 0) {
@@ -36,9 +46,7 @@ void moveCursor(int key) {
     }
     break;
   case ARROW_RIGHT:
-    if (editorState.cursory < editorState.numrows &&
-        editorState.cursorx <
-            (int)editorState.rows[editorState.cursory].size()) {
+    if (row && editorState.cursorx < static_cast<int>(row->chars.size())) {
       editorState.cursorx++;
     }
     break;
@@ -52,5 +60,13 @@ void moveCursor(int key) {
       editorState.cursory++;
     }
     break;
+  }
+
+  row = (editorState.cursory >= editorState.numrows)
+            ? NULL
+            : &editorState.rows[editorState.cursory];
+  int rowLen = row ? static_cast<int>(row->chars.size()) : 0;
+  if (editorState.cursorx > rowLen) {
+    editorState.cursorx = rowLen;
   }
 }

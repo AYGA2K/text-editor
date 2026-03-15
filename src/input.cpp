@@ -101,13 +101,21 @@ void handleInsertMode() {
     deleteCharAt(editorState.cursory, editorState.cursorx);
   } break;
 
+    // Backspace key
   case 127: {
     deleteCharAt(editorState.cursory, editorState.cursorx - 1);
     if (editorState.cursorx > 0) {
       editorState.cursorx--;
     }
   } break;
-
+    // Escape key
+  case 27:
+    editorState.mode = NORMAL;
+    break;
+    // Tab key
+  case 9: {
+    editorInsertChar('\t');
+  } break;
   default:
     if (c >= 32 && c < 127) {
       editorInsertChar(c);

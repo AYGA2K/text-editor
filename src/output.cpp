@@ -10,9 +10,21 @@ void refreshScreen() {
 
   drawRaws();
 
+  int rx = 0;
+  if (editorState.cursory < editorState.numrows) {
+    const EditorRow &row = editorState.rows[editorState.cursory];
+    for (int j = 0; j < editorState.cursorx && j < static_cast<int>(row.chars.size()); j++) {
+      if (row.chars[j] == '\t') {
+        rx += (tabWidth - 1) - (rx % tabWidth) + 1;
+      } else {
+        rx++;
+      }
+    }
+  }
+
   std::ostringstream oss;
   oss << "\x1b[" << editorState.cursory - editorState.row_offest + 1 << ";"
-      << editorState.cursorx - editorState.col_offset + 1
+      << rx - editorState.col_offset + 1
       << "H"; // reposition the cursor
   buffer += oss.str();
 
@@ -43,7 +55,8 @@ void drawRaws() {
         buffer += "~";
       }
     } else {
-      const std::string &line = editorState.rows[filerow];
+      const EditorRow &erow = editorState.rows[filerow];
+      const std::string &line = erow.render;
       int linelen = line.size();
       int len;
 
@@ -68,21 +81,42 @@ void drawRaws() {
 }
 
 void editorScroll() {
+  int rx = 0;
+  if (editorState.cursory < editorState.numrows) {
+    const EditorRow &row = editorState.rows[editorState.cursory];
+    // Convert cursor x from chars index to render index (tabs expanded)
+    for (int j = 0; j < editorState.cursorx && j < static_cast<int>(row.chars.size()); j++) {
+      if (row.chars[j] == '\t') {
+        rx += (tabWidth - 1) - (rx % tabWidth) + 1;
+      } else {
+        rx++;
+      }
+    }
+  }
+  // If the cursor moves above the visible window,
+  // adjust the vertical scroll offset so the cursor's row
+  // becomes the first visible row.
   if (editorState.cursory < editorState.row_offest) {
     editorState.row_offest = editorState.cursory;
   }
 
-  if (editorState.cursory >=
-      editorState.row_offest + editorState.screenrows) {
-    editorState.row_offest =
-        editorState.cursory - editorState.screenrows + 1;
+  // If the cursor moves below the visible window,
+  // scroll down so the cursor appears on the last visible row.
+  if (editorState.cursory >= editorState.row_offest + editorState.screenrows) {
+    editorState.row_offest = editorState.cursory - editorState.screenrows + 1;
   }
-  if (editorState.cursorx < editorState.col_offset) {
-    editorState.col_offset = editorState.cursorx;
+
+  // If the cursor moves left of the visible window,
+  // adjust the horizontal scroll offset so the cursor's column
+  // becomes the first visible column.
+  if (rx < editorState.col_offset) {
+    editorState.col_offset = rx;
   }
-  if (editorState.cursorx >=
-      editorState.col_offset + editorState.screencols) {
-    editorState.col_offset =
-        editorState.cursorx - editorState.screencols + 1;
+
+  // If the cursor moves right of the visible window,
+  // scroll horizontally so the cursor appears in the last
+  // visible column of the screen.
+  if (rx >= editorState.col_offset + editorState.screencols) {
+    editorState.col_offset = rx - editorState.screencols + 1;
   }
 }

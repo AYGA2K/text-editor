@@ -8,7 +8,7 @@
 
 std::string buffer;
 struct EditorState editorState;
-int tabWidth = 2;
+int tabWidth = 4;
 
 int getWindowSize(int *rows, int *cols) {
   struct winsize ws;
@@ -53,7 +53,7 @@ void initEditor() {
   editorState.cursorx = 0;
   editorState.cursory = 0;
   editorState.numrows = 0;
-  editorState.row_offest = 0;
+  editorState.row_offset = 0;
   editorState.col_offset = 0;
   if (getWindowSize(&editorState.screenrows, &editorState.screencols) == -1) {
     die("getWindowSize");

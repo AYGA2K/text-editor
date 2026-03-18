@@ -33,7 +33,7 @@ struct EditorState {
   int cursory;                   // cursor row position in the file
   int screenrows;                // number of rows the terminal can display
   int screencols;                // number of columns the terminal can display
-  int row_offest;                // vertical scroll offset
+  int row_offset;                // vertical scroll offset
   int col_offset;                // horizontal scroll offset
 };
 

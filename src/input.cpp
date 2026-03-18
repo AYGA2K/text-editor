@@ -70,6 +70,22 @@ int readKey() {
   return c;
 }
 
+void handlePageDownPageUpKeys(int c) {
+  if (c == PAGE_UP) {
+    editorState.cursory = editorState.row_offset;
+  } else if (c == PAGE_DOWN) {
+    editorState.cursory = editorState.row_offset + editorState.screenrows - 1;
+    if (editorState.cursory > editorState.numrows) {
+      editorState.cursory = editorState.numrows;
+    }
+  }
+  int times = editorState.screenrows;
+  while (times > 0) {
+    moveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
+    times--;
+  }
+}
+
 void handleInsertMode() {
   int c = readKey();
   switch (c) {
@@ -81,16 +97,14 @@ void handleInsertMode() {
     editorState.cursorx = 0;
     break;
   case END_KEY:
-    editorState.cursorx = editorState.screencols - 1;
+    if (editorState.cursory < editorState.numrows) {
+      editorState.cursorx = editorState.rows[editorState.cursory].chars.size();
+    }
     break;
   case PAGE_DOWN:
-  case PAGE_UP: {
-    int times = editorState.screenrows;
-    while (times > 0) {
-      moveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
-      times--;
-    }
-  } break;
+  case PAGE_UP:
+    handlePageDownPageUpKeys(c);
+    break;
   case ARROW_LEFT:
   case ARROW_RIGHT:
   case ARROW_DOWN:
@@ -146,6 +160,10 @@ void handleNormalMode() {
     break;
   case 108:
     moveCursor(ARROW_RIGHT);
+    break;
+  case PAGE_DOWN:
+  case PAGE_UP:
+    handlePageDownPageUpKeys(c);
     break;
   }
 }

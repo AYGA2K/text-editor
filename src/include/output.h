@@ -3,3 +3,4 @@
 void refreshScreen();
 void drawRaws();
 void editorScroll();
+void drawStatusBar();

@@ -1,15 +1,16 @@
 #include "include/output.h"
 #include "include/editor.h"
-#include <cstddef>
 #include <sstream>
 #include <string>
 #include <unistd.h>
 
 void refreshScreen() {
   editorScroll();
-  buffer += "\x1b[H"; // reposition the cursor back up at the top-left corner
+  buffer.append(
+      "\x1b[H"); // reposition the cursor back up at the top-left corner
 
   drawRaws();
+  drawStatusBar();
 
   int rx = 0;
   if (editorState.cursory < editorState.numrows) {
@@ -28,7 +29,7 @@ void refreshScreen() {
   std::ostringstream oss;
   oss << "\x1b[" << editorState.cursory - editorState.row_offset + 1 << ";"
       << rx - editorState.col_offset + 1 << "H"; // reposition the cursor
-  buffer += oss.str();
+  buffer.append(oss.str());
 
   write(STDOUT_FILENO, buffer.data(), buffer.size());
 
@@ -48,13 +49,13 @@ void drawRaws() {
 
         int padding = (editorState.screencols - welcomelen) / 2;
         if (padding > 0) {
-          buffer += "~";
+          buffer.append("~");
           padding--;
         }
-        buffer += std::string(padding, ' ');
-        buffer += welcome.substr(0, welcomelen);
+        buffer.append(std::string(padding, ' '));
+        buffer.append(welcome.substr(0, welcomelen));
       } else {
-        buffer += "~";
+        buffer.append("~");
       }
     } else {
       const EditorRow &erow = editorState.rows[filerow];
@@ -67,15 +68,12 @@ void drawRaws() {
         if (len > editorState.screencols) {
           len = editorState.screencols;
         }
-        buffer += line.substr(editorState.col_offset, len);
+        buffer.append(line.substr(editorState.col_offset, len));
       }
     }
 
-    buffer += "\x1b[K"; // clear the rest of the line
-
-    if (y < editorState.screenrows - 1) {
-      buffer += "\r\n"; // newline
-    }
+    buffer.append("\x1b[K"); // clear the rest of the line
+    buffer.append("\r\n");   // newline
   }
 }
 
@@ -126,4 +124,16 @@ void editorScroll() {
   if (editorState.cursory >= editorState.row_offset + editorState.screenrows) {
     editorState.row_offset = editorState.cursory - editorState.screenrows + 1;
   }
+}
+
+void drawStatusBar() {
+  // Set background and foreground colors
+  // Format: \x1b[<fg>;<bg>m
+  buffer.append("\x1b[38;5;250;48;5;238m");
+
+  // Fill the status bar with spaces
+  buffer.append(std::string(editorState.screencols, ' '));
+
+  // Reset terminal formatting
+  buffer.append("\x1b[m");
 }

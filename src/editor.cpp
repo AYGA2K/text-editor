@@ -58,4 +58,5 @@ void initEditor() {
   if (getWindowSize(&editorState.screenrows, &editorState.screencols) == -1) {
     die("getWindowSize");
   }
+  editorState.screenrows -= 1;
 }

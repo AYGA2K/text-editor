@@ -1,4 +1,5 @@
 #pragma once
+#include <ctime>
 #include <string>
 #include <termios.h>
 #include <vector>
@@ -20,21 +21,24 @@ enum EditorKey {
 };
 
 struct EditorRow {
-  std::string chars;   // raw characters (may contain '\t')
-  std::string render;  // rendered characters (tabs expanded to spaces)
+  std::string chars;  // raw characters (may contain '\t')
+  std::string render; // rendered characters (tabs expanded to spaces)
 };
 
 struct EditorState {
-  struct termios orig_termios;   // original terminal settings
-  Mode mode = NORMAL;            // current editor mode
-  std::vector<EditorRow> rows;   // lines of the file
-  int numrows;                   // total number of rows in the file
-  int cursorx;                   // cursor column position in the current row
-  int cursory;                   // cursor row position in the file
-  int screenrows;                // number of rows the terminal can display
-  int screencols;                // number of columns the terminal can display
-  int row_offset;                // vertical scroll offset
-  int col_offset;                // horizontal scroll offset
+  struct termios orig_termios; // original terminal settings
+  Mode mode = NORMAL;          // current editor mode
+  std::vector<EditorRow> rows; // lines of the file
+  int numrows;                 // total number of rows in the file
+  int cursorx;                 // cursor column position in the current row
+  int cursory;                 // cursor row position in the file
+  int screenrows;              // number of rows the terminal can display
+  int screencols;              // number of columns the terminal can display
+  int row_offset;              // vertical scroll offset
+  int col_offset;              // horizontal scroll offset
+  std::string message;         // message for the user
+  std::time_t message_time;    // timestamp when message was set
+  std::string filename;        // current opened file name
 };
 
 extern struct EditorState editorState;
@@ -45,3 +49,4 @@ int getWindowSize(int *rows, int *cols);
 void initEditor();
 void editorOpen(const std::string &filename);
 void editorUpdateRow(EditorRow &row);
+std::string getEditorMode();

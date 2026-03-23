@@ -1,5 +1,7 @@
 #include "include/editor.h"
 #include "include/utils.h"
+#include <cstddef>
+#include <ctime>
 #include <fstream>
 #include <string>
 #include <string_view>
@@ -9,6 +11,19 @@
 std::string buffer;
 struct EditorState editorState;
 int tabWidth = 4;
+
+std::string getEditorMode() {
+  switch (editorState.mode) {
+  case NORMAL:
+    return "NORMAL";
+  case INSERT:
+    return "INSERT";
+  case COMMAND:
+    return "COMMAND";
+  case VISUAL:
+    return "VISUAL";
+  }
+}
 
 int getWindowSize(int *rows, int *cols) {
   struct winsize ws;
@@ -39,6 +54,7 @@ void editorOpen(const std::string &filename) {
   if (!file.is_open()) {
     die("fopen");
   }
+  editorState.filename = filename;
   std::string line;
   while (std::getline(file, line)) {
     EditorRow row;
@@ -55,8 +71,9 @@ void initEditor() {
   editorState.numrows = 0;
   editorState.row_offset = 0;
   editorState.col_offset = 0;
+  editorState.message_time = std::time(NULL);
   if (getWindowSize(&editorState.screenrows, &editorState.screencols) == -1) {
     die("getWindowSize");
   }
-  editorState.screenrows -= 1;
+  editorState.screenrows -= 2;
 }

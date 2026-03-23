@@ -13,6 +13,7 @@ int main(int argc, char *argv[]) {
     editorOpen(argv[1]);
   }
 
+  editorState.message = "HELP: Ctrl-Q = quit";
   while (1) {
     refreshScreen();
     processKeyPress();

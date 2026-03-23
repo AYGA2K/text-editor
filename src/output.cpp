@@ -1,5 +1,7 @@
 #include "include/output.h"
 #include "include/editor.h"
+#include <cstddef>
+#include <ctime>
 #include <sstream>
 #include <string>
 #include <unistd.h>
@@ -11,6 +13,7 @@ void refreshScreen() {
 
   drawRaws();
   drawStatusBar();
+  drawMessageBar();
 
   int rx = 0;
   if (editorState.cursory < editorState.numrows) {
@@ -130,10 +133,32 @@ void drawStatusBar() {
   // Set background and foreground colors
   // Format: \x1b[<fg>;<bg>m
   buffer.append("\x1b[38;5;250;48;5;238m");
+  std::string barContent;
+  if (!editorState.filename.empty()) {
+    barContent.append(editorState.filename);
+  } else {
+    barContent.append("[No name]");
+  }
 
-  // Fill the status bar with spaces
-  buffer.append(std::string(editorState.screencols, ' '));
+  barContent.append(" " + std::to_string(editorState.numrows) + " lines");
+
+  const std::string mode = getEditorMode();
+  int remaining = editorState.screencols - barContent.size() - mode.size();
+  if (remaining > 0) {
+    // Fill the status bar with spaces
+    barContent.append(std::string(remaining, ' '));
+  }
+  barContent.append(mode);
+  buffer.append(barContent);
 
   // Reset terminal formatting
   buffer.append("\x1b[m");
+  buffer.append("\r\n");
+}
+void drawMessageBar() {
+  buffer.append("\x1b[K"); // clear the message bar
+  const std::time_t now = std::time(NULL);
+  if (now - editorState.message_time < 5) {
+    buffer.append(editorState.message);
+  }
 }

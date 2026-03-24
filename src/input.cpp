@@ -115,19 +115,16 @@ void handleInsertMode() {
     deleteCharAt(editorState.cursory, editorState.cursorx);
   } break;
 
-    // Backspace key
-  case 127: {
+  case BACKSPACE: {
     deleteCharAt(editorState.cursory, editorState.cursorx - 1);
     if (editorState.cursorx > 0) {
       editorState.cursorx--;
     }
   } break;
-    // Escape key
-  case 27:
+  case ESCAPE:
     editorState.mode = NORMAL;
     break;
-    // Tab key
-  case 9: {
+  case TAB: {
     editorInsertChar('\t');
   } break;
   default:
@@ -165,6 +162,22 @@ void handleNormalMode() {
   case PAGE_UP:
     handlePageDownPageUpKeys(c);
     break;
+  case ':':
+    editorState.mode = COMMAND;
+    break;
+  }
+}
+void handleCommandMode() {
+  int c = readKey();
+  switch (c) {
+  case 'w':
+    editorSave();
+    break;
+  case 'q':
+    clearScreen();
+    exit(0);
+  case ESCAPE:
+    editorState.mode = NORMAL;
   }
 }
 
@@ -179,6 +192,7 @@ void processKeyPress() {
   case VISUAL:
     break;
   case COMMAND:
+    handleCommandMode();
     break;
   }
 }

@@ -77,3 +77,30 @@ void initEditor() {
   }
   editorState.screenrows -= 2;
 }
+void editorSetStatusMessage(std::string msg) {
+  editorState.message = msg;
+  editorState.message_time = std::time(NULL);
+}
+
+std::string rowsToString() {
+  std::string result;
+  for (EditorRow row : editorState.rows) {
+    result.append(row.chars);
+    result.append("\n");
+  }
+  return result;
+}
+
+void editorSave() {
+  if (editorState.filename.empty()) {
+    return;
+  }
+  std::ofstream file(editorState.filename);
+  if (file.is_open()) {
+    const std::string data = rowsToString();
+    file << data;
+    file.close();
+    editorSetStatusMessage(std::to_string(data.size()) +
+                           " bytes written to disk");
+  }
+}

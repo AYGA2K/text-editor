@@ -9,6 +9,9 @@
 enum Mode { NORMAL, INSERT, VISUAL, COMMAND };
 
 enum EditorKey {
+  TAB = 9,
+  ESCAPE = 27,
+  BACKSPACE = 127,
   ARROW_LEFT = 1000,
   ARROW_RIGHT,
   ARROW_UP,
@@ -50,3 +53,5 @@ void initEditor();
 void editorOpen(const std::string &filename);
 void editorUpdateRow(EditorRow &row);
 std::string getEditorMode();
+void editorSetStatusMessage(std::string msg);
+void editorSave();

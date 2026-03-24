@@ -12,8 +12,7 @@ int main(int argc, char *argv[]) {
   if (argc >= 2) {
     editorOpen(argv[1]);
   }
-
-  editorState.message = "HELP: Ctrl-Q = quit";
+  editorSetStatusMessage("HELP: Ctrl-Q = quit");
   while (1) {
     refreshScreen();
     processKeyPress();

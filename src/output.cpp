@@ -142,13 +142,11 @@ void drawStatusBar() {
 
   barContent.append(" " + std::to_string(editorState.numrows) + " lines");
 
-  const std::string mode = getEditorMode();
-  int remaining = editorState.screencols - barContent.size() - mode.size();
+  int remaining = editorState.screencols - barContent.size();
   if (remaining > 0) {
     // Fill the status bar with spaces
     barContent.append(std::string(remaining, ' '));
   }
-  barContent.append(mode);
   buffer.append(barContent);
 
   // Reset terminal formatting

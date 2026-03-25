@@ -30,7 +30,6 @@ struct EditorRow {
 
 struct EditorState {
   struct termios orig_termios; // original terminal settings
-  Mode mode = NORMAL;          // current editor mode
   std::vector<EditorRow> rows; // lines of the file
   int numrows;                 // total number of rows in the file
   int cursorx;                 // cursor column position in the current row
@@ -42,6 +41,7 @@ struct EditorState {
   std::string message;         // message for the user
   std::time_t message_time;    // timestamp when message was set
   std::string filename;        // current opened file name
+  bool modified;               // true if the file has unsaved data
 };
 
 extern struct EditorState editorState;
@@ -52,6 +52,6 @@ int getWindowSize(int *rows, int *cols);
 void initEditor();
 void editorOpen(const std::string &filename);
 void editorUpdateRow(EditorRow &row);
-std::string getEditorMode();
+void editorQuit();
 void editorSetStatusMessage(std::string msg);
 void editorSave();

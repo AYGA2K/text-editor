@@ -3,7 +3,6 @@
 #include "include/operations.h"
 #include "include/utils.h"
 #include <cerrno>
-#include <cstdlib>
 #include <unistd.h>
 
 int readKey() {
@@ -86,12 +85,14 @@ void handlePageDownPageUpKeys(int c) {
   }
 }
 
-void handleInsertMode() {
+void processKeyPress() {
   int c = readKey();
   switch (c) {
   case CTRL_KEY('q'):
-    clearScreen();
-    exit(0);
+    editorQuit();
+    break;
+  case CTRL_KEY('s'):
+    editorSave();
     break;
   case HOME_KEY:
     editorState.cursorx = 0;
@@ -116,13 +117,18 @@ void handleInsertMode() {
   } break;
 
   case BACKSPACE: {
+    const int previousRowIndex =
+        editorState.cursory - 1 >= 0 ? editorState.cursory - 1 : -1;
+    if ((editorState.cursorx == 0) && (previousRowIndex >= 0)) {
+      editorState.cursory--;
+      editorState.cursorx = editorState.rows[previousRowIndex].chars.size();
+    }
     deleteCharAt(editorState.cursory, editorState.cursorx - 1);
     if (editorState.cursorx > 0) {
       editorState.cursorx--;
     }
   } break;
   case ESCAPE:
-    editorState.mode = NORMAL;
     break;
   case TAB: {
     editorInsertChar('\t');
@@ -131,68 +137,6 @@ void handleInsertMode() {
     if (c >= 32 && c < 127) {
       editorInsertChar(c);
     }
-    break;
-  }
-}
-void handleNormalMode() {
-  int c = readKey();
-  switch (c) {
-  case 105:
-    editorState.mode = INSERT;
-    break;
-  case ARROW_LEFT:
-  case ARROW_RIGHT:
-  case ARROW_DOWN:
-  case ARROW_UP:
-    moveCursor(c);
-    break;
-  case 104:
-    moveCursor(ARROW_LEFT);
-    break;
-  case 106:
-    moveCursor(ARROW_DOWN);
-    break;
-  case 107:
-    moveCursor(ARROW_UP);
-    break;
-  case 108:
-    moveCursor(ARROW_RIGHT);
-    break;
-  case PAGE_DOWN:
-  case PAGE_UP:
-    handlePageDownPageUpKeys(c);
-    break;
-  case ':':
-    editorState.mode = COMMAND;
-    break;
-  }
-}
-void handleCommandMode() {
-  int c = readKey();
-  switch (c) {
-  case 'w':
-    editorSave();
-    break;
-  case 'q':
-    clearScreen();
-    exit(0);
-  case ESCAPE:
-    editorState.mode = NORMAL;
-  }
-}
-
-void processKeyPress() {
-  switch (editorState.mode) {
-  case NORMAL:
-    handleNormalMode();
-    break;
-  case INSERT:
-    handleInsertMode();
-    break;
-  case VISUAL:
-    break;
-  case COMMAND:
-    handleCommandMode();
     break;
   }
 }

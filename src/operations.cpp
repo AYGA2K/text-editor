@@ -23,6 +23,7 @@ void editorInsertChar(int c) {
   editorState.rows[row].chars.insert(col, 1, static_cast<char>(c));
   editorUpdateRow(editorState.rows[row]);
   editorState.cursorx++;
+  editorState.modified = true;
 }
 
 void deleteCharAt(int row, int col) {

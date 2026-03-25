@@ -11,19 +11,7 @@
 std::string buffer;
 struct EditorState editorState;
 int tabWidth = 4;
-
-std::string getEditorMode() {
-  switch (editorState.mode) {
-  case NORMAL:
-    return "NORMAL";
-  case INSERT:
-    return "INSERT";
-  case COMMAND:
-    return "COMMAND";
-  case VISUAL:
-    return "VISUAL";
-  }
-}
+int quitTimes = 0;
 
 int getWindowSize(int *rows, int *cols) {
   struct winsize ws;
@@ -81,6 +69,16 @@ void editorSetStatusMessage(std::string msg) {
   editorState.message = msg;
   editorState.message_time = std::time(NULL);
 }
+void editorQuit() {
+  clearScreen();
+  if (editorState.modified && quitTimes == 0) {
+    editorSetStatusMessage(
+        "File has unsaved data! please click Ctrl-q one more time to quit");
+    quitTimes++;
+    return;
+  }
+  exit(0);
+}
 
 std::string rowsToString() {
   std::string result;
@@ -102,5 +100,6 @@ void editorSave() {
     file.close();
     editorSetStatusMessage(std::to_string(data.size()) +
                            " bytes written to disk");
+    editorState.modified = false;
   }
 }

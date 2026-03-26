@@ -143,6 +143,20 @@ void processKeyPress() {
       }
     } else {
       const EditorRow currentRow = editorState.rows[currentRowIndex];
+      const std::string cursorEndRowChars = currentRow.chars.substr(
+          editorState.cursorx, currentRow.chars.size() - editorState.cursorx);
+      const std::string cursorEndRowRender = currentRow.render.substr(
+          editorState.cursorx, currentRow.render.size() - editorState.cursorx);
+      EditorRow newRow = {};
+      newRow.chars = cursorEndRowChars;
+      newRow.render = cursorEndRowRender;
+      editorState.rows[currentRowIndex].chars =
+          currentRow.chars.substr(0, editorState.cursorx);
+      editorState.rows[currentRowIndex].render =
+          currentRow.render.substr(0, editorState.cursorx);
+      editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,
+                              newRow);
+      editorState.cursorx = 0;
     }
     editorState.cursory++;
   }

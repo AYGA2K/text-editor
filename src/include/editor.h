@@ -10,6 +10,7 @@ enum Mode { NORMAL, INSERT, VISUAL, COMMAND };
 
 enum EditorKey {
   TAB = 9,
+  ENTER = 13,
   ESCAPE = 27,
   BACKSPACE = 127,
   ARROW_LEFT = 1000,

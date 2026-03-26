@@ -130,6 +130,24 @@ void processKeyPress() {
   } break;
   case ESCAPE:
     break;
+  case ENTER: {
+    const int currentRowIndex = editorState.cursory;
+    EditorRow row = {};
+    if (editorState.cursorx >=
+        editorState.rows[currentRowIndex].chars.size() - 1) {
+      if (currentRowIndex + 1 < editorState.rows.size()) {
+        editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,
+                                row);
+      } else {
+        editorState.rows.push_back(row);
+      }
+    } else {
+      const EditorRow currentRow = editorState.rows[currentRowIndex];
+    }
+    editorState.cursory++;
+  }
+
+  break;
   case TAB: {
     editorInsertChar('\t');
   } break;

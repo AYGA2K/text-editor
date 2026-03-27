@@ -1,0 +1,18 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: gram://docs/debugger
+[
+  {
+    "label": "Debug (CMake)",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$GRAM_WORKTREE_ROOT/build/main",
+    "cwd": "$GRAM_WORKTREE_ROOT",
+    "build": {
+      "command": "make",
+      "args": ["build"],
+      "cwd": "$GRAM_WORKTREE_ROOT",
+    },
+  },
+]

@@ -2,6 +2,7 @@
 #include "include/editor.h"
 #include "include/operations.h"
 #include "include/utils.h"
+#include <algorithm>
 #include <cerrno>
 #include <unistd.h>
 
@@ -136,8 +137,7 @@ void processKeyPress() {
     if (editorState.cursorx >=
         editorState.rows[currentRowIndex].chars.size() - 1) {
       if (currentRowIndex + 1 < editorState.rows.size()) {
-        editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,
-                                row);
+        editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,  row);
       } else {
         editorState.rows.push_back(row);
       }
@@ -145,17 +145,23 @@ void processKeyPress() {
       const EditorRow currentRow = editorState.rows[currentRowIndex];
       const std::string cursorEndRowChars = currentRow.chars.substr(
           editorState.cursorx, currentRow.chars.size() - editorState.cursorx);
+      int tabsNumBeforeCursor =
+          count(currentRow.chars.begin(),
+                currentRow.chars.begin() + editorState.cursorx, '\t');
+      int tabsNumAfterCursor =
+          count(currentRow.chars.begin() + editorState.cursorx,
+                currentRow.chars.end(), '\t');
       const std::string cursorEndRowRender = currentRow.render.substr(
-          editorState.cursorx, currentRow.render.size() - editorState.cursorx);
+          editorState.cursorx + tabsNumBeforeCursor,
+          currentRow.render.size() - editorState.cursorx + tabsNumAfterCursor);
       EditorRow newRow = {};
       newRow.chars = cursorEndRowChars;
       newRow.render = cursorEndRowRender;
       editorState.rows[currentRowIndex].chars =
           currentRow.chars.substr(0, editorState.cursorx);
-      editorState.rows[currentRowIndex].render =
-          currentRow.render.substr(0, editorState.cursorx);
-      editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,
-                              newRow);
+      editorState.rows[currentRowIndex].render = currentRow.render.substr(
+          0, editorState.cursorx + tabsNumBeforeCursor);
+      editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,newRow);
       editorState.cursorx = 0;
     }
     editorState.cursory++;

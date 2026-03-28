@@ -56,3 +56,4 @@ void editorUpdateRow(EditorRow &row);
 void editorQuit();
 void editorSetStatusMessage(std::string msg);
 void editorSave();
+int cxToRx(const std::string_view chars, int cx); // CursorX to RenderX

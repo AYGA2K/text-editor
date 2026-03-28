@@ -103,3 +103,15 @@ void editorSave() {
     editorState.modified = false;
   }
 }
+
+int cxToRx(const std::string_view chars, int cx) {
+  int rx = 0;
+  for (int i = 0; i < cx; i++) {
+    if (chars[i] == '\t') {
+      rx += tabWidth;
+    } else {
+      rx++;
+    }
+  }
+  return rx;
+}

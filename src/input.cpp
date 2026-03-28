@@ -2,7 +2,6 @@
 #include "include/editor.h"
 #include "include/operations.h"
 #include "include/utils.h"
-#include <algorithm>
 #include <cerrno>
 #include <unistd.h>
 
@@ -134,36 +133,46 @@ void processKeyPress() {
   case ENTER: {
     const int currentRowIndex = editorState.cursory;
     EditorRow row = {};
-    if (editorState.cursorx >=
-        editorState.rows[currentRowIndex].chars.size() - 1) {
+    // If cursor is at the begenning or after the last char of the line
+    if (editorState.cursorx == 0 ||
+        editorState.cursorx >=
+            editorState.rows[currentRowIndex].chars.size() - 1) {
       if (currentRowIndex + 1 < editorState.rows.size()) {
-        editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,  row);
+        editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,
+                                row);
       } else {
         editorState.rows.push_back(row);
       }
     } else {
+      // If the cursor is before the last char in the line
       const EditorRow currentRow = editorState.rows[currentRowIndex];
+
       const std::string cursorEndRowChars = currentRow.chars.substr(
           editorState.cursorx, currentRow.chars.size() - editorState.cursorx);
-      int tabsNumBeforeCursor =
-          count(currentRow.chars.begin(),
-                currentRow.chars.begin() + editorState.cursorx, '\t');
-      int tabsNumAfterCursor =
-          count(currentRow.chars.begin() + editorState.cursorx,
-                currentRow.chars.end(), '\t');
-      const std::string cursorEndRowRender = currentRow.render.substr(
-          editorState.cursorx + tabsNumBeforeCursor,
-          currentRow.render.size() - editorState.cursorx + tabsNumAfterCursor);
+      // Chars from cursor till the end of the line
+
+      // Convert cursor position from chars index to render index (accounts for
+      // tabs)
+      int rx = cxToRx(currentRow.chars, editorState.cursorx);
+
+      // Rendred chars from cursor till the end of the line
+      const std::string cursorEndRowRender = currentRow.render.substr(rx);
+
+      // Keep chars before cursor in the current line
+      editorState.rows[currentRowIndex].chars =
+          currentRow.chars.substr(0, editorState.cursorx);
+      editorState.rows[currentRowIndex].render =
+          currentRow.render.substr(0, rx);
+
+      // Add a new line with the chars after the cursor
       EditorRow newRow = {};
       newRow.chars = cursorEndRowChars;
       newRow.render = cursorEndRowRender;
-      editorState.rows[currentRowIndex].chars =
-          currentRow.chars.substr(0, editorState.cursorx);
-      editorState.rows[currentRowIndex].render = currentRow.render.substr(
-          0, editorState.cursorx + tabsNumBeforeCursor);
-      editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,newRow);
-      editorState.cursorx = 0;
+      editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,
+                              newRow);
     }
+    editorState.numrows++;
+    editorState.cursorx = 0;
     editorState.cursory++;
   }
 

@@ -1,4 +1,6 @@
 #include "include/editor.h"
+#include "include/input.h"
+#include "include/output.h"
 #include "include/utils.h"
 #include <cstddef>
 #include <ctime>
@@ -65,7 +67,7 @@ void initEditor() {
   }
   editorState.screenrows -= 2;
 }
-void editorSetStatusMessage(std::string msg) {
+void editorSetStatusMessage(std::string_view msg) {
   editorState.message = msg;
   editorState.message_time = std::time(NULL);
 }
@@ -91,6 +93,12 @@ std::string rowsToString() {
 
 void editorSave() {
   if (editorState.filename.empty()) {
+    editorState.filename = editorPrompt("Save as: ");
+    if (editorState.filename.empty()) {
+      editorSetStatusMessage("Save canceled");
+    }
+  }
+  if (editorState.filename.empty()) {
     return;
   }
   std::ofstream file(editorState.filename);
@@ -104,7 +112,7 @@ void editorSave() {
   }
 }
 
-int cxToRx(const std::string_view chars, int cx) {
+int cxToRx(std::string_view chars, int cx) {
   int rx = 0;
   for (int i = 0; i < cx; i++) {
     if (chars[i] == '\t') {
@@ -114,4 +122,25 @@ int cxToRx(const std::string_view chars, int cx) {
     }
   }
   return rx;
+}
+std::string editorPrompt(const std::string &prompt) {
+  std::string buff = "";
+  while (true) {
+    editorSetStatusMessage(prompt + buff);
+    refreshScreen();
+    int c = readKey();
+    if (c == '\x1b') {
+      editorSetStatusMessage("");
+      return "";
+    }
+    if ((c == BACKSPACE || c == DEL_KEY) && !buff.empty()) {
+      buff.pop_back();
+    }
+    if (c == '\r' && buff.size() != 0) {
+      editorSetStatusMessage("");
+      return buff;
+    } else if (!iscntrl(c) && c < 128) {
+      buff += c;
+    }
+  }
 }

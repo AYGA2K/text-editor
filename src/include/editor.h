@@ -1,6 +1,7 @@
 #pragma once
 #include <ctime>
 #include <string>
+#include <string_view>
 #include <termios.h>
 #include <vector>
 
@@ -54,6 +55,7 @@ void initEditor();
 void editorOpen(const std::string &filename);
 void editorUpdateRow(EditorRow &row);
 void editorQuit();
-void editorSetStatusMessage(std::string msg);
+void editorSetStatusMessage(std::string_view msg);
 void editorSave();
-int cxToRx(const std::string_view chars, int cx); // CursorX to RenderX
+std::string editorPrompt(const std::string &prompt);
+int cxToRx(std::string_view chars, int cx); // CursorX to RenderX

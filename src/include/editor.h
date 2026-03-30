@@ -57,5 +57,7 @@ void editorUpdateRow(EditorRow &row);
 void editorQuit();
 void editorSetStatusMessage(std::string_view msg);
 void editorSave();
-std::string editorPrompt(const std::string &prompt);
+void editorFind();
+std::string editorPrompt(const std::string &prompt,
+                         void (*callback)(std::string, int));
 int cxToRx(std::string_view chars, int cx); // CursorX to RenderX

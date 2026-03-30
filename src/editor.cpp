@@ -93,7 +93,7 @@ std::string rowsToString() {
 
 void editorSave() {
   if (editorState.filename.empty()) {
-    editorState.filename = editorPrompt("Save as: ");
+    editorState.filename = editorPrompt("Save as: ", NULL);
     if (editorState.filename.empty()) {
       editorSetStatusMessage("Save canceled");
     }
@@ -123,7 +123,8 @@ int cxToRx(std::string_view chars, int cx) {
   }
   return rx;
 }
-std::string editorPrompt(const std::string &prompt) {
+std::string editorPrompt(const std::string &prompt,
+                         void (*callback)(std::string, int)) {
   std::string buff = "";
   while (true) {
     editorSetStatusMessage(prompt + buff);
@@ -131,6 +132,9 @@ std::string editorPrompt(const std::string &prompt) {
     int c = readKey();
     if (c == '\x1b') {
       editorSetStatusMessage("");
+      if (callback) {
+        callback(buff, c);
+      }
       return "";
     }
     if ((c == BACKSPACE || c == DEL_KEY) && !buff.empty()) {
@@ -138,9 +142,62 @@ std::string editorPrompt(const std::string &prompt) {
     }
     if (c == '\r' && buff.size() != 0) {
       editorSetStatusMessage("");
+      if (callback) {
+        callback(buff, c);
+      }
       return buff;
     } else if (!iscntrl(c) && c < 128) {
       buff += c;
     }
+    if (callback) {
+      callback(buff, c);
+    }
   }
+}
+void editorFindCallback(std::string query, int key) {
+  static int last_match = -1;
+  static int direction = 1;
+  if (key == ENTER || key == ESCAPE) {
+    return;
+  }
+  if (key == ARROW_RIGHT || key == ARROW_DOWN) {
+    direction = 1;
+  } else if (key == ARROW_LEFT || key == ARROW_UP) {
+    direction = -1;
+  }
+  if (last_match == -1) {
+    direction = 1;
+  }
+  int current = last_match;
+  for (int i = 0; i < editorState.rows.size(); i++) {
+    current += direction;
+    if (current == -1) {
+      current = editorState.numrows - 1;
+    } else if (current == editorState.numrows) {
+      current = 0;
+    }
+    const EditorRow row = editorState.rows[current];
+    const int pos = row.chars.find(query);
+    if (pos != std::string::npos) {
+      last_match = current;
+      editorState.cursory = current;
+      editorState.cursorx = pos;
+      editorState.row_offset = editorState.numrows;
+      break;
+    }
+  }
+}
+void editorFind() {
+  int savedCursorX = editorState.cursorx;
+  int savedCursorY = editorState.cursory;
+  int saved_colloff = editorState.col_offset;
+  int saved_rowoff = editorState.row_offset;
+  const std::string query = editorPrompt("Search: ", editorFindCallback);
+  if (query.empty()) {
+    return;
+  }
+  editorState.cursorx = savedCursorX;
+  editorState.cursory = savedCursorY;
+  editorState.col_offset = saved_colloff;
+  editorState.row_offset = saved_rowoff;
 }

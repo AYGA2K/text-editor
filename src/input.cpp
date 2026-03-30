@@ -94,6 +94,9 @@ void processKeyPress() {
   case CTRL_KEY('s'):
     editorSave();
     break;
+  case CTRL_KEY('f'):
+    editorFind();
+    break;
   case HOME_KEY:
     editorState.cursorx = 0;
     break;

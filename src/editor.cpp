@@ -158,25 +158,30 @@ void editorFindCallback(std::string query, int key) {
   static int last_match = -1;
   static int direction = 1;
   if (key == ENTER || key == ESCAPE) {
+    last_match = -1;
+    direction = 1;
     return;
   }
   if (key == ARROW_RIGHT || key == ARROW_DOWN) {
     direction = 1;
   } else if (key == ARROW_LEFT || key == ARROW_UP) {
     direction = -1;
+  } else {
+    last_match = -1;
+    direction = 1;
   }
   if (last_match == -1) {
     direction = 1;
   }
   int current = last_match;
-  for (int i = 0; i < editorState.rows.size(); i++) {
+  for (int i = 0; i < editorState.numrows; i++) {
     current += direction;
     if (current == -1) {
       current = editorState.numrows - 1;
     } else if (current == editorState.numrows) {
       current = 0;
     }
-    const EditorRow row = editorState.rows[current];
+    const EditorRow &row = editorState.rows[current];
     const int pos = row.chars.find(query);
     if (pos != std::string::npos) {
       last_match = current;

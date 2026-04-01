@@ -130,7 +130,7 @@ std::string editorPrompt(const std::string &prompt,
     editorSetStatusMessage(prompt + buff);
     refreshScreen();
     int c = readKey();
-    if (c == '\x1b') {
+    if (c == ESCAPE) {
       editorSetStatusMessage("");
       if (callback) {
         callback(buff, c);

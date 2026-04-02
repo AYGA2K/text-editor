@@ -140,8 +140,9 @@ void processKeyPress() {
     // If cursor is at the begenning or after the last char of the line
     if (editorState.cursorx == 0 ||
         editorState.cursorx >=
-            editorState.rows[currentRowIndex].chars.size() - 1) {
-      if (currentRowIndex + 1 < editorState.rows.size()) {
+            static_cast<int>(editorState.rows[currentRowIndex].chars.size()) -
+                1) {
+      if (currentRowIndex + 1 < editorState.numrows) {
         editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,
                                 row);
       } else {

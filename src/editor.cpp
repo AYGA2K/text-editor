@@ -182,11 +182,11 @@ void editorFindCallback(std::string query, int key) {
       current = 0;
     }
     const EditorRow &row = editorState.rows[current];
-    const int pos = row.chars.find(query);
+    const size_t pos = row.chars.find(query);
     if (pos != std::string::npos) {
       last_match = current;
       editorState.cursory = current;
-      editorState.cursorx = pos;
+      editorState.cursorx = static_cast<int>(pos);
       editorState.row_offset = editorState.numrows;
       break;
     }

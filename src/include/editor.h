@@ -68,13 +68,13 @@ struct Editor {
 namespace Terminal {
 void enable();
 void disable();
-}
+} // namespace Terminal
 
 namespace Input {
 int readKey();
 void processKeyPress();
 void handlePageKeys(int c);
-}
+} // namespace Input
 
 namespace Output {
 void refreshScreen();
@@ -82,22 +82,22 @@ void drawRows();
 void scroll();
 void drawStatusBar();
 void drawMessageBar();
-}
+} // namespace Output
 
 namespace Operations {
 void insertChar(int c);
 void deleteCharAt(int row, int col);
 void moveCursor(int key);
-}
+} // namespace Operations
 
 namespace Utils {
 void clearScreen();
-void die(const char *s);
+void die(std::string_view s);
 template <typename T> void debugLog(T value) {
-    std::ofstream f("tmp/debug.log", std::ios::app);
-    if (f)
-        f << value << '\n';
+  std::ofstream f("tmp/debug.log", std::ios::app);
+  if (f)
+    f << value << '\n';
 }
-}
+} // namespace Utils
 
 extern Editor editor;

@@ -186,5 +186,4 @@ void processKeyPress() {
     break;
   }
 }
-
 } // namespace Input

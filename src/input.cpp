@@ -1,8 +1,7 @@
-#include "include/input.h"
 #include "include/editor.h"
-#include "include/operations.h"
-#include "include/utils.h"
 #include <unistd.h>
+
+namespace Input {
 
 int readKey() {
   char c = '\0';
@@ -10,7 +9,7 @@ int readKey() {
   while ((nread = read(STDIN_FILENO, &c, 1)) == 0)
     ;
   if (nread == -1) {
-    die("read");
+    Utils::die("read");
   }
   if (c == '\x1b') {
     char seq[3];
@@ -66,22 +65,21 @@ int readKey() {
     }
     return '\x1b';
   }
-
   return c;
 }
 
-void handlePageDownPageUpKeys(int c) {
+void handlePageKeys(int c) {
   if (c == PAGE_UP) {
-    editorState.cursory = editorState.row_offset;
+    editor.cursory = editor.row_offset;
   } else if (c == PAGE_DOWN) {
-    editorState.cursory = editorState.row_offset + editorState.screenrows - 1;
-    if (editorState.cursory > editorState.numrows) {
-      editorState.cursory = editorState.numrows;
+    editor.cursory = editor.row_offset + editor.screenrows - 1;
+    if (editor.cursory > editor.numrows) {
+      editor.cursory = editor.numrows;
     }
   }
-  int times = editorState.screenrows;
+  int times = editor.screenrows;
   while (times > 0) {
-    moveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
+    Operations::moveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
     times--;
   }
 }
@@ -90,105 +88,103 @@ void processKeyPress() {
   int c = readKey();
   switch (c) {
   case CTRL_KEY('q'):
-    editorQuit();
+    editor.quit();
     break;
   case CTRL_KEY('s'):
-    editorSave();
+    editor.save();
     break;
   case CTRL_KEY('f'):
-    editorFind();
+    editor.find();
     break;
   case HOME_KEY:
-    editorState.cursorx = 0;
+    editor.cursorx = 0;
     break;
   case END_KEY:
-    if (editorState.cursory < editorState.numrows) {
-      editorState.cursorx = editorState.rows[editorState.cursory].chars.size();
+    if (editor.cursory < editor.numrows) {
+      editor.cursorx = editor.rows[editor.cursory].chars.size();
     }
     break;
   case PAGE_DOWN:
   case PAGE_UP:
-    handlePageDownPageUpKeys(c);
+    handlePageKeys(c);
     break;
   case ARROW_LEFT:
   case ARROW_RIGHT:
   case ARROW_DOWN:
   case ARROW_UP:
-    moveCursor(c);
+    Operations::moveCursor(c);
     break;
   case DEL_KEY: {
-    deleteCharAt(editorState.cursory, editorState.cursorx);
+    Operations::deleteCharAt(editor.cursory, editor.cursorx);
   } break;
 
   case BACKSPACE: {
     const int previousRowIndex =
-        editorState.cursory - 1 >= 0 ? editorState.cursory - 1 : -1;
-    if ((editorState.cursorx == 0) && (previousRowIndex >= 0)) {
-      editorState.cursory--;
-      editorState.cursorx = editorState.rows[previousRowIndex].chars.size();
+        editor.cursory - 1 >= 0 ? editor.cursory - 1 : -1;
+    if ((editor.cursorx == 0) && (previousRowIndex >= 0)) {
+      editor.cursory--;
+      editor.cursorx = editor.rows[previousRowIndex].chars.size();
     }
-    deleteCharAt(editorState.cursory, editorState.cursorx - 1);
-    if (editorState.cursorx > 0) {
-      editorState.cursorx--;
+    Operations::deleteCharAt(editor.cursory, editor.cursorx - 1);
+    if (editor.cursorx > 0) {
+      editor.cursorx--;
     }
   } break;
   case ESCAPE:
     break;
   case ENTER: {
-    const int currentRowIndex = editorState.cursory;
+    const int currentRowIndex = editor.cursory;
     EditorRow row = {};
     // If cursor is at the begenning or after the last char of the line
-    if (editorState.cursorx == 0 ||
-        editorState.cursorx >=
-            static_cast<int>(editorState.rows[currentRowIndex].chars.size()) -
-                1) {
-      if (currentRowIndex + 1 < editorState.numrows) {
-        editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,
-                                row);
+    if (editor.cursorx == 0 ||
+        editor.cursorx >=
+            static_cast<int>(editor.rows[currentRowIndex].chars.size()) - 1) {
+      if (currentRowIndex + 1 < static_cast<int>(editor.rows.size())) {
+        editor.rows.insert(editor.rows.begin() + currentRowIndex + 1, row);
       } else {
-        editorState.rows.push_back(row);
+        editor.rows.push_back(row);
       }
     } else {
       // If the cursor is before the last char in the line
-      const EditorRow currentRow = editorState.rows[currentRowIndex];
+      const EditorRow currentRow = editor.rows[currentRowIndex];
 
-      const std::string cursorEndRowChars = currentRow.chars.substr(
-          editorState.cursorx, currentRow.chars.size() - editorState.cursorx);
       // Chars from cursor till the end of the line
+      const std::string cursorEndRowChars = currentRow.chars.substr(
+          editor.cursorx, currentRow.chars.size() - editor.cursorx);
 
       // Convert cursor position from chars index to render index (accounts for
       // tabs)
-      int rx = cxToRx(currentRow.chars, editorState.cursorx);
+      int rx = editor.cxToRx(currentRow.chars, editor.cursorx);
 
       // Rendred chars from cursor till the end of the line
       const std::string cursorEndRowRender = currentRow.render.substr(rx);
 
       // Keep chars before cursor in the current line
-      editorState.rows[currentRowIndex].chars =
-          currentRow.chars.substr(0, editorState.cursorx);
-      editorState.rows[currentRowIndex].render =
-          currentRow.render.substr(0, rx);
+      editor.rows[currentRowIndex].chars =
+          currentRow.chars.substr(0, editor.cursorx);
+      editor.rows[currentRowIndex].render = currentRow.render.substr(0, rx);
 
       // Add a new line with the chars after the cursor
       EditorRow newRow = {};
       newRow.chars = cursorEndRowChars;
       newRow.render = cursorEndRowRender;
-      editorState.rows.insert(editorState.rows.begin() + currentRowIndex + 1,
-                              newRow);
+      editor.rows.insert(editor.rows.begin() + currentRowIndex + 1, newRow);
     }
-    editorState.numrows++;
-    editorState.cursorx = 0;
-    editorState.cursory++;
+    editor.numrows++;
+    editor.cursorx = 0;
+    editor.cursory++;
   }
 
   break;
   case TAB: {
-    editorInsertChar('\t');
+    Operations::insertChar('\t');
   } break;
   default:
     if (c >= 32 && c < 127) {
-      editorInsertChar(c);
+      Operations::insertChar(c);
     }
     break;
   }
 }
+
+} // namespace Input

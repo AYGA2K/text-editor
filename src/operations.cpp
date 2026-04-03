@@ -1,73 +1,78 @@
-#include "include/operations.h"
 #include "include/editor.h"
 #include <cstddef>
 
-void editorInsertChar(int c) {
-  int row = editorState.cursory;
-  int col = editorState.cursorx;
+namespace Operations {
 
-  // Create missing rows if needed
-  if (row >= editorState.numrows) {
-    while (editorState.numrows <= row) {
-      EditorRow newRow;
-      editorState.rows.push_back(newRow);
-      editorState.numrows++;
+void insertChar(int c) {
+    int row = editor.cursory;
+    int col = editor.cursorx;
+
+    // Create missing rows if needed
+    if (row >= editor.numrows) {
+        while (editor.numrows <= row) {
+            EditorRow newRow;
+            editor.rows.push_back(newRow);
+            editor.numrows++;
+        }
     }
-  }
 
-  // Fill row with spaces if cursor is past the end
-  if (col >= static_cast<int>(editorState.rows[row].chars.size())) {
-    editorState.rows[row].chars.resize(col, ' ');
-  }
+    // Fill row with spaces if cursor is past the end
+    if (col >= static_cast<int>(editor.rows[row].chars.size())) {
+        editor.rows[row].chars.resize(col, ' ');
+    }
 
-  editorState.rows[row].chars.insert(col, 1, static_cast<char>(c));
-  editorUpdateRow(editorState.rows[row]);
-  editorState.cursorx++;
-  editorState.modified = true;
+    editor.rows[row].chars.insert(col, 1, static_cast<char>(c));
+    editor.updateRow(editor.rows[row]);
+    editor.cursorx++;
+    editor.modified = true;
 }
 
 void deleteCharAt(int row, int col) {
-  if (row < 0 || row >= editorState.numrows)
-    return;
-  if (col < 0 || col >= static_cast<int>(editorState.rows[row].chars.size()))
-    return;
+    if (row < 0 || row >= editor.numrows)
+        return;
+    if (col < 0 ||
+        col >= static_cast<int>(editor.rows[row].chars.size()))
+        return;
 
-  editorState.rows[row].chars.erase(col, 1);
-  editorUpdateRow(editorState.rows[row]);
+    editor.rows[row].chars.erase(col, 1);
+    editor.updateRow(editor.rows[row]);
 }
 
 void moveCursor(int key) {
-  EditorRow *row = (editorState.cursory >= editorState.numrows)
-                       ? NULL
-                       : &editorState.rows[editorState.cursory];
-  switch (key) {
-  case ARROW_LEFT:
-    if (editorState.cursorx != 0) {
-      editorState.cursorx--;
+    EditorRow *row = (editor.cursory >= editor.numrows)
+                         ? NULL
+                         : &editor.rows[editor.cursory];
+    switch (key) {
+    case ARROW_LEFT:
+        if (editor.cursorx != 0) {
+            editor.cursorx--;
+        }
+        break;
+    case ARROW_RIGHT:
+        if (row &&
+            editor.cursorx < static_cast<int>(row->chars.size())) {
+            editor.cursorx++;
+        }
+        break;
+    case ARROW_UP:
+        if (editor.cursory != 0) {
+            editor.cursory--;
+        }
+        break;
+    case ARROW_DOWN:
+        if (editor.cursory < editor.numrows) {
+            editor.cursory++;
+        }
+        break;
     }
-    break;
-  case ARROW_RIGHT:
-    if (row && editorState.cursorx < static_cast<int>(row->chars.size())) {
-      editorState.cursorx++;
-    }
-    break;
-  case ARROW_UP:
-    if (editorState.cursory != 0) {
-      editorState.cursory--;
-    }
-    break;
-  case ARROW_DOWN:
-    if (editorState.cursory < editorState.numrows) {
-      editorState.cursory++;
-    }
-    break;
-  }
 
-  row = (editorState.cursory >= editorState.numrows)
-            ? NULL
-            : &editorState.rows[editorState.cursory];
-  int rowLen = row ? static_cast<int>(row->chars.size()) : 0;
-  if (editorState.cursorx > rowLen) {
-    editorState.cursorx = rowLen;
-  }
+    row = (editor.cursory >= editor.numrows)
+              ? NULL
+              : &editor.rows[editor.cursory];
+    int rowLen = row ? static_cast<int>(row->chars.size()) : 0;
+    if (editor.cursorx > rowLen) {
+        editor.cursorx = rowLen;
+    }
+}
+
 }

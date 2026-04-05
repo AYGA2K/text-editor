@@ -3,6 +3,7 @@
 #include <ctime>
 #include <sstream>
 #include <string>
+#include <sys/types.h>
 #include <unistd.h>
 
 namespace Output {
@@ -34,7 +35,7 @@ void refreshScreen() {
       << rx - editor.col_offset + 1 << "H"; // reposition the cursor
   editor.buffer.append(oss.str());
 
-  size_t n = write(STDOUT_FILENO, editor.buffer.data(), editor.buffer.size());
+  ssize_t n = write(STDOUT_FILENO, editor.buffer.data(), editor.buffer.size());
   if (n == -1) {
     Utils::die("Error writing to stdout");
   }

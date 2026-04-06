@@ -121,12 +121,12 @@ void processKeyPress() {
   case BACKSPACE: {
     const int previousRowIndex =
         editor.cursory - 1 >= 0 ? editor.cursory - 1 : -1;
-    if ((editor.cursorx == 8) && (previousRowIndex >= 0)) {
+    if ((editor.cursorx == 0) && (previousRowIndex >= 0)) {
       editor.cursory--;
       editor.cursorx = editor.rows[previousRowIndex].chars.size();
     }
     Operations::deleteCharAt(editor.cursory, editor.cursorx - 1);
-    if (editor.cursorx > 8) {
+    if (editor.cursorx > 0) {
       editor.cursorx--;
     }
   } break;
@@ -134,19 +134,12 @@ void processKeyPress() {
     break;
   case ENTER: {
     const int currentRowIndex = editor.cursory;
-    EditorRow row = {};
-    std::string rowNum = std::to_string(editor.numrows);
-    if (rowNum.size() < 4) {
-      rowNum =
-          std::string(4 - rowNum.size(), ' ') + rowNum; // left-pad with spaces
-    }
-    rowNum.resize(8, ' ');
-    row.chars = rowNum;
-    row.render = rowNum;
     // If cursor is at the begenning or after the last char of the line
-    if (editor.cursorx == 8 ||
+    if (editor.cursorx == 0 ||
         editor.cursorx >=
             static_cast<int>(editor.rows[currentRowIndex].chars.size()) - 1) {
+      EditorRow row = {};
+      row.line_num = editor.numrows + 1;
       if (currentRowIndex + 1 < static_cast<int>(editor.rows.size())) {
         editor.rows.insert(editor.rows.begin() + currentRowIndex + 1, row);
       } else {
@@ -174,12 +167,13 @@ void processKeyPress() {
 
       // Add a new line with the chars after the cursor
       EditorRow newRow = {};
-      newRow.chars += cursorEndRowChars;
-      newRow.render += cursorEndRowRender;
+      newRow.chars = cursorEndRowChars;
+      newRow.render = cursorEndRowRender;
+      newRow.line_num = editor.numrows + 1;
       editor.rows.insert(editor.rows.begin() + currentRowIndex + 1, newRow);
     }
     editor.numrows++;
-    editor.cursorx = 8;
+    editor.cursorx = 0;
     editor.cursory++;
   }
 

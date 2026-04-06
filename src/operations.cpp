@@ -11,6 +11,7 @@ void insertChar(int c) {
   if (row >= editor.numrows) {
     while (editor.numrows <= row) {
       EditorRow newRow;
+      newRow.line_num = editor.numrows + 1;
       editor.rows.push_back(newRow);
       editor.numrows++;
     }
@@ -30,7 +31,7 @@ void insertChar(int c) {
 void deleteCharAt(int row, int col) {
   if (row < 0 || row >= editor.numrows)
     return;
-  if (col < 8 || col >= static_cast<int>(editor.rows[row].chars.size()))
+  if (col < 0 || col >= static_cast<int>(editor.rows[row].chars.size()))
     return;
 
   editor.rows[row].chars.erase(col, 1);
@@ -42,7 +43,7 @@ void moveCursor(int key) {
       (editor.cursory >= editor.numrows) ? NULL : &editor.rows[editor.cursory];
   switch (key) {
   case ARROW_LEFT:
-    if (editor.cursorx != 8) {
+    if (editor.cursorx != 0) {
       editor.cursorx--;
     }
     break;
@@ -65,7 +66,7 @@ void moveCursor(int key) {
 
   row =
       (editor.cursory >= editor.numrows) ? NULL : &editor.rows[editor.cursory];
-  int rowLen = row ? static_cast<int>(row->chars.size()) : 8;
+  int rowLen = row ? static_cast<int>(row->chars.size()) : 0;
   if (editor.cursorx > rowLen) {
     editor.cursorx = rowLen;
   }

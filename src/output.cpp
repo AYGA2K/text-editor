@@ -32,7 +32,8 @@ void refreshScreen() {
 
   std::ostringstream oss;
   oss << "\x1b[" << editor.cursory - editor.row_offset + 1 << ";"
-      << rx - editor.col_offset + 1 << "H"; // reposition the cursor
+      << rx - editor.col_offset + editor.gutterWidth + 1
+      << "H"; // reposition the cursor
   editor.buffer.append(oss.str());
 
   ssize_t n = write(STDOUT_FILENO, editor.buffer.data(), editor.buffer.size());
@@ -47,6 +48,7 @@ void drawRows() {
   for (int y = 0; y < editor.screenrows; y++) {
     int filerow = y + editor.row_offset;
     if (filerow >= editor.numrows) {
+      editor.buffer.append(std::string(editor.gutterWidth, ' '));
       if (editor.numrows == 0 && y == editor.screenrows / 3) {
         std::string welcome = "The editor";
         int welcomelen = static_cast<int>(welcome.size());
@@ -55,26 +57,32 @@ void drawRows() {
 
         int padding = (editor.screencols - welcomelen) / 2;
         if (padding > 0) {
-          editor.buffer.append("~");
           padding--;
         }
         editor.buffer.append(std::string(padding, ' '));
         editor.buffer.append(welcome.substr(0, welcomelen));
-      } else {
-        editor.buffer.append("~");
       }
     } else {
+      const std::string GUTTER_FG = "\x1b[38;5;240m";
+      const std::string RESET = "\x1b[m";
       const EditorRow &erow = editor.rows[filerow];
-      const std::string &line = erow.render;
-      int linelen = line.size();
-      int len;
+      std::string rowNum = std::to_string(erow.line_num);
+      if (rowNum.size() < 4) {
+        rowNum = std::string(4 - rowNum.size(), ' ') +
+                 rowNum; // left-pad with spaces
+      }
+      rowNum.resize(editor.gutterWidth, ' ');
+      editor.buffer.append(GUTTER_FG);
+      editor.buffer.append(rowNum);
+      editor.buffer.append(RESET);
 
+      int linelen = static_cast<int>(erow.render.size());
       if (editor.col_offset < linelen) {
-        len = linelen - editor.col_offset;
+        int len = linelen - editor.col_offset;
         if (len > editor.screencols) {
           len = editor.screencols;
         }
-        editor.buffer.append(line.substr(editor.col_offset, len));
+        editor.buffer.append(erow.render.substr(editor.col_offset, len));
       }
     }
 

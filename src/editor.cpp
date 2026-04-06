@@ -42,21 +42,16 @@ void Editor::open(const std::string &fname) {
   std::string line;
   while (std::getline(file, line)) {
     EditorRow row;
-    std::string rowNum = std::to_string(editor.numrows);
-    if (rowNum.size() < 4) {
-      rowNum =
-          std::string(4 - rowNum.size(), ' ') + rowNum; // left-pad with spaces
-    }
-    rowNum.resize(8, ' ');
-    row.chars = rowNum + line; // keep tabs as '\t' in chars
-    updateRow(row);            // prepare render with tabs expanded
+    row.line_num = editor.numrows + 1;
+    row.chars = line; // keep tabs as '\t' in chars
+    updateRow(row);   // prepare render with tabs expanded
     rows.push_back(row);
     numrows += 1;
   }
 }
 
 void Editor::init() {
-  cursorx = 8;
+  cursorx = 0;
   cursory = 0;
   numrows = 0;
   row_offset = 0;
@@ -65,6 +60,7 @@ void Editor::init() {
   if (getWindowSize(&screenrows, &screencols) == -1) {
     Utils::die("getWindowSize");
   }
+  screencols -= gutterWidth;
   screenrows -= 2;
 }
 

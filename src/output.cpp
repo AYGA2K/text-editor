@@ -1,7 +1,6 @@
 #include "include/editor.h"
 #include <cstddef>
 #include <ctime>
-#include <sstream>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
@@ -30,11 +29,11 @@ void refreshScreen() {
     }
   }
 
-  std::ostringstream oss;
-  oss << "\x1b[" << editor.cursory - editor.row_offset + 1 << ";"
-      << rx - editor.col_offset + editor.gutterWidth + 1
-      << "H"; // reposition the cursor
-  editor.buffer.append(oss.str());
+  std::string cursorSeq =
+      "\x1b[" + std::to_string(editor.cursory - editor.row_offset + 1) + ";" +
+      std::to_string(rx - editor.col_offset + editor.gutterWidth + 1) +
+      "H"; // reposition the cursor
+  editor.buffer.append(cursorSeq);
 
   ssize_t n = write(STDOUT_FILENO, editor.buffer.data(), editor.buffer.size());
   if (n == -1) {
@@ -66,7 +65,7 @@ void drawRows() {
       const std::string GUTTER_FG = "\x1b[38;5;240m";
       const std::string RESET = "\x1b[m";
       const EditorRow &erow = editor.rows[filerow];
-      std::string rowNum = std::to_string(erow.line_num);
+      std::string rowNum = std::to_string(y + 1);
       if (rowNum.size() < 4) {
         rowNum = std::string(4 - rowNum.size(), ' ') +
                  rowNum; // left-pad with spaces

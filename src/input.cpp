@@ -139,7 +139,6 @@ void processKeyPress() {
         editor.cursorx >=
             static_cast<int>(editor.rows[currentRowIndex].chars.size()) - 1) {
       EditorRow row = {};
-      row.line_num = editor.numrows + 1;
       if (currentRowIndex + 1 < static_cast<int>(editor.rows.size())) {
         editor.rows.insert(editor.rows.begin() + currentRowIndex + 1, row);
       } else {
@@ -169,7 +168,6 @@ void processKeyPress() {
       EditorRow newRow = {};
       newRow.chars = cursorEndRowChars;
       newRow.render = cursorEndRowRender;
-      newRow.line_num = editor.numrows + 1;
       editor.rows.insert(editor.rows.begin() + currentRowIndex + 1, newRow);
     }
     editor.numrows++;

@@ -42,7 +42,6 @@ void Editor::open(const std::string &fname) {
   std::string line;
   while (std::getline(file, line)) {
     EditorRow row;
-    row.line_num = editor.numrows + 1;
     row.chars = line; // keep tabs as '\t' in chars
     updateRow(row);   // prepare render with tabs expanded
     rows.push_back(row);

@@ -29,13 +29,12 @@ enum EditorKey {
 struct EditorRow {
   std::string chars;  // raw characters (may contain '\t')
   std::string render; // rendered characters (tabs expanded to spaces)
-  int line_num = 0;   // line number
 };
 
 struct Editor {
-  struct termios orig_termios;  // original terminal settings
-  std::vector<EditorRow> rows;  // lines of the file
-  int numrows = 0;              // total number of rows in the file
+  struct termios orig_termios; // original terminal settings
+  std::vector<EditorRow> rows; // lines of the file
+  int numrows = 0;             // total number of rows in the file
   static constexpr int gutterWidth = 8;
   int cursorx = 0;              // cursor column position in the current row
   int cursory = 0;              // cursor row position in the file

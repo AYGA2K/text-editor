@@ -11,7 +11,6 @@ void insertChar(int c) {
   if (row >= editor.numrows) {
     while (editor.numrows <= row) {
       EditorRow newRow;
-      newRow.line_num = editor.numrows + 1;
       editor.rows.push_back(newRow);
       editor.numrows++;
     }

@@ -91,6 +91,10 @@ void handleBackspace() {
   const int previousRowIndex =
       editor.cursory - 1 >= 0 ? editor.cursory - 1 : -1;
   if ((editor.cursorx == 0) && (previousRowIndex >= 0)) {
+    const EditorRow currentRow = editor.rows[editor.cursory];
+    editor.rows[previousRowIndex].chars += currentRow.chars;
+    editor.rows[previousRowIndex].render += currentRow.render;
+    editor.rows.erase(editor.rows.begin() + editor.cursory);
     editor.cursory--;
     editor.cursorx = editor.rows[previousRowIndex].chars.size();
   }

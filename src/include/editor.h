@@ -35,7 +35,7 @@ struct Editor {
   struct termios orig_termios; // original terminal settings
   std::vector<EditorRow> rows; // lines of the file
   int numrows = 0;             // total number of rows in the file
-  static constexpr int gutterWidth = 8;
+  static constexpr int gutterWidth = 6;
   int cursorx = 0;              // cursor column position in the current row
   int cursory = 0;              // cursor row position in the file
   int screenrows = 0;           // number of rows the terminal can display

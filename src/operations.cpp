@@ -70,4 +70,68 @@ void moveCursor(int key) {
     editor.cursorx = rowLen;
   }
 }
+
+void handlePageKeys(int c) {
+  if (c == PAGE_UP) {
+    editor.cursory = editor.row_offset;
+  } else if (c == PAGE_DOWN) {
+    editor.cursory = editor.row_offset + editor.screenrows - 1;
+    if (editor.cursory > editor.numrows) {
+      editor.cursory = editor.numrows;
+    }
+  }
+  int times = editor.screenrows;
+  while (times > 0) {
+    moveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
+    times--;
+  }
+}
+
+void handleBackspace() {
+  const int previousRowIndex =
+      editor.cursory - 1 >= 0 ? editor.cursory - 1 : -1;
+  if ((editor.cursorx == 0) && (previousRowIndex >= 0)) {
+    editor.cursory--;
+    editor.cursorx = editor.rows[previousRowIndex].chars.size();
+  }
+  deleteCharAt(editor.cursory, editor.cursorx - 1);
+  if (editor.cursorx > 0) {
+    editor.cursorx--;
+  }
+}
+
+void handleEnter() {
+  const int currentRowIndex = editor.cursory;
+  if (editor.cursorx == 0 ||
+      editor.cursorx >=
+          static_cast<int>(editor.rows[currentRowIndex].chars.size()) - 1) {
+    EditorRow row = {};
+    if (currentRowIndex + 1 < static_cast<int>(editor.rows.size())) {
+      editor.rows.insert(editor.rows.begin() + currentRowIndex + 1, row);
+    } else {
+      editor.rows.push_back(row);
+    }
+  } else {
+    const EditorRow currentRow = editor.rows[currentRowIndex];
+
+    const std::string cursorEndRowChars = currentRow.chars.substr(
+        editor.cursorx, currentRow.chars.size() - editor.cursorx);
+
+    int rx = editor.cxToRx(currentRow.chars, editor.cursorx);
+
+    const std::string cursorEndRowRender = currentRow.render.substr(rx);
+
+    editor.rows[currentRowIndex].chars =
+        currentRow.chars.substr(0, editor.cursorx);
+    editor.rows[currentRowIndex].render = currentRow.render.substr(0, rx);
+
+    EditorRow newRow = {};
+    newRow.chars = cursorEndRowChars;
+    newRow.render = cursorEndRowRender;
+    editor.rows.insert(editor.rows.begin() + currentRowIndex + 1, newRow);
+  }
+  editor.numrows++;
+  editor.cursorx = 0;
+  editor.cursory++;
+}
 } // namespace Operations

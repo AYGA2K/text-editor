@@ -74,7 +74,6 @@ void disable();
 namespace Input {
 int readKey();
 void processKeyPress();
-void handlePageKeys(int c);
 } // namespace Input
 
 namespace Output {
@@ -89,6 +88,9 @@ namespace Operations {
 void insertChar(int c);
 void deleteCharAt(int row, int col);
 void moveCursor(int key);
+void handlePageKeys(int c);
+void handleBackspace();
+void handleEnter();
 } // namespace Operations
 
 namespace Utils {

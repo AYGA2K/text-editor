@@ -152,41 +152,101 @@ std::string Editor::prompt(const std::string &promptMsg,
   }
 }
 
-void Editor::findCallback(std::string query, int key) {
-  static int last_match = -1;
-  static int direction = 1;
+void findCallback(std::string query, int key) {
+  static int last_row = editor.cursory;
+  static int last_column = 0;
+  static int start = 0;     // from which column in the row we start searching
+  static int direction = 1; // 1 = forward, -1 = backward
+
+  // Exit search mode
   if (key == ENTER || key == ESCAPE) {
-    last_match = -1;
+    last_row = -1;
     direction = 1;
     return;
   }
+
+  // Set direction and start position based on arrow key
   if (key == ARROW_RIGHT || key == ARROW_DOWN) {
+    if (editor.cursory == last_row) {
+      // Same row: start after current match
+      start = editor.cursorx + 1;
+    } else {
+      // Different row: start from beginning
+      start = 0;
+    }
     direction = 1;
   } else if (key == ARROW_LEFT || key == ARROW_UP) {
+    if (editor.cursory == last_row) {
+      // Same row: start before current match
+      start = last_column - 1;
+      if (start < 0)
+        start = 0; // prevent negative
+    } else {
+      // Different row: start from end of string (for reverse search)
+      start = static_cast<int>(std::string::npos);
+    }
     direction = -1;
   } else {
-    last_match = -1;
+    // Any other key resets search state
+    last_row = -1;
     direction = 1;
   }
-  if (last_match == -1) {
+
+  if (last_row == -1) {
     direction = 1;
   }
-  int current = last_match;
+
+  int current = last_row;
+  // Search until we find a match (wrap around if needed)
   for (int i = 0; i < editor.numrows; i++) {
-    current += direction;
+    // Move to next/previous row when we exhaust current row
+    if ((direction == 1 && start == 0 && last_column == 0) ||
+        (direction == -1 && start == std::string::npos && last_column == 0)) {
+      current += direction;
+    }
+
+    // Wrap around
     if (current == -1) {
       current = editor.numrows - 1;
     } else if (current == editor.numrows) {
       current = 0;
     }
+
     const EditorRow &row = editor.rows[current];
-    const int pos = row.chars.find(query);
-    if (pos != static_cast<int>(std::string::npos)) {
-      last_match = current;
+    int pos = -1;
+
+    if (direction == 1) {
+      // Forward search
+      size_t found = row.chars.find(query, start);
+      if (found != std::string::npos)
+        pos = static_cast<int>(found);
+    } else {
+      // Backward search
+      size_t found;
+      if (start == std::string::npos) {
+        found = row.chars.rfind(query); // start from end
+      } else {
+        found = row.chars.rfind(query, start); // start before current
+      }
+      if (found != std::string::npos)
+        pos = static_cast<int>(found);
+    }
+
+    if (pos != -1) {
+      // Match found
+      last_row = current;
       editor.cursory = current;
       editor.cursorx = pos;
-      editor.row_offset = editor.numrows;
+      last_column = pos;
       break;
+    } else {
+      // No match in this row: reset for next row
+      if (direction == 1) {
+        start = 0;
+      } else {
+        start = static_cast<int>(std::string::npos);
+      }
+      last_column = 0;
     }
   }
 }

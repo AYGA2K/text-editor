@@ -63,7 +63,6 @@ struct Editor {
   std::string prompt(const std::string &prompt,
                      void (*callback)(std::string, int));
   void find();
-  static void findCallback(std::string query, int key);
 };
 
 namespace Terminal {

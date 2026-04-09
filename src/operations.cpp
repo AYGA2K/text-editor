@@ -106,7 +106,8 @@ void handleBackspace() {
 
 void handleEnter() {
   const int currentRowIndex = editor.cursory;
-  if (editor.cursorx == 0 ||
+  if (editor.numrows == 0 ||
+      (editor.cursorx == 0 && editor.rows[currentRowIndex].chars.size() == 0) ||
       editor.cursorx >=
           static_cast<int>(editor.rows[currentRowIndex].chars.size()) - 1) {
     EditorRow row = {};

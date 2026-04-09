@@ -201,7 +201,8 @@ void findCallback(std::string query, int key) {
   for (int i = 0; i < editor.numrows; i++) {
     // Move to next/previous row when we exhaust current row
     if ((direction == 1 && start == 0 && last_column == 0) ||
-        (direction == -1 && start == std::string::npos && last_column == 0)) {
+        (direction == -1 && start == static_cast<int>(std::string::npos) &&
+         last_column == 0)) {
       current += direction;
     }
 
@@ -223,7 +224,7 @@ void findCallback(std::string query, int key) {
     } else {
       // Backward search
       size_t found;
-      if (start == std::string::npos) {
+      if (start == static_cast<int>(std::string::npos)) {
         found = row.chars.rfind(query); // start from end
       } else {
         found = row.chars.rfind(query, start); // start before current

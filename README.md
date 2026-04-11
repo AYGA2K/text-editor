@@ -2,7 +2,7 @@
 
 A small terminal text editor in C++. It uses raw mode, draws to the terminal, and edits a file.
 
-<video src="demo.mp4" controls></video>
+![demo](demo.gif)
 
 ## Build
 

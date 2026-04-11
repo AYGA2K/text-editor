@@ -154,7 +154,7 @@ std::string Editor::prompt(const std::string &promptMsg,
 
 void findCallback(std::string query, int key) {
   static int last_row = editor.cursory;
-  static int last_column = 0;
+  static int last_column = editor.cursorx;
   static int start = 0;     // from which column in the row we start searching
   static int direction = 1; // 1 = forward, -1 = backward
 
@@ -162,6 +162,8 @@ void findCallback(std::string query, int key) {
   if (key == ENTER || key == ESCAPE) {
     last_row = -1;
     direction = 1;
+    start = editor.cursorx;
+    last_column = -1;
     return;
   }
 
@@ -195,14 +197,28 @@ void findCallback(std::string query, int key) {
   if (last_row == -1) {
     direction = 1;
   }
+  if (last_column == -1) {
+    last_column = editor.cursorx;
+  }
 
-  int current = last_row;
+  bool starting_fresh = (last_row == -1);
+  int current;
+  if (starting_fresh) {
+    current = editor.cursory;
+    start = editor.cursorx;
+    last_column = editor.cursorx;
+  } else {
+    current = last_row;
+  }
   // Search until we find a match (wrap around if needed)
   for (int i = 0; i < editor.numrows; i++) {
     // Move to next/previous row when we exhaust current row
-    if ((direction == 1 && start == 0 && last_column == 0) ||
-        (direction == -1 && start == static_cast<int>(std::string::npos) &&
-         last_column == 0)) {
+    // Skip on first iteration of a fresh search so we check the current row
+    // first
+    if ((!starting_fresh || i > 0) &&
+        ((direction == 1 && start == 0 && last_column == 0) ||
+         (direction == -1 && start == static_cast<int>(std::string::npos) &&
+          last_column == 0))) {
       current += direction;
     }
 

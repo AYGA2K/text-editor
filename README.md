@@ -1,8 +1,16 @@
 # text-editor
 
-A small terminal text editor in C++. It uses raw mode, draws to the terminal, and edits a file.
+A terminal text editor built from scratch in C++ with no external libraries.
 
 ![demo](demo.gif)
+
+## Features
+
+- Open, edit, and save files
+- Keyboard navigation — arrow keys, Page Up/Down, Home/End
+- Incremental search (Ctrl-F) with multiple matches per line, forward/backward cycling, and wrap-around
+- Line numbers
+- Warns you before discarding unsaved changes (unlike some people)
 
 ## Build
 
@@ -20,7 +28,7 @@ The binary is `build/main`.
 ./build/main
 ```
 
-Optional: pass a file path to open it.
+Pass a file path to open it directly.
 
 ```bash
 ./build/main path/to/file.txt
@@ -29,10 +37,8 @@ Optional: pass a file path to open it.
 ## Keys
 
 - **Ctrl-S** — save
-- **Ctrl-Q** — quit (may ask to confirm if there are unsaved changes)
 - **Ctrl-F** — find
-
-The status line at the bottom shows the same hints when you start.
+- **Ctrl-Q** — quit (will ask to confirm if you have unsaved changes)
 
 ## Clean
 

@@ -10,7 +10,7 @@ A terminal text editor built from scratch in C++ with no external libraries.
 - Keyboard navigation — arrow keys, Page Up/Down, Home/End
 - Incremental search (Ctrl-F) with multiple matches per line, forward/backward cycling, and wrap-around
 - Line numbers
-- Warns you before discarding unsaved changes (unlike some people)
+- Warns you before discarding unsaved changes
 
 ## Build
 
